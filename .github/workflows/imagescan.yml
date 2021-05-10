@@ -1,0 +1,74 @@
+name: Image Security Scan
+
+on:
+  push:
+  workflow_dispatch:
+  schedule:
+    - cron: "25 4 * * *"
+
+jobs:
+  scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    if: ${{ !contains(github.event.head_commit.message, '[ci skip]') || github.event_name != 'push' }}
+    steps:
+      - name: Check out the source code
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1.3.0
+
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v2.4.0
+        with:
+          context: .
+          load: true
+          pull: true
+          push: false
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new
+          tags: postfix-relay:${{ github.sha }}
+
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+      - name: Determine security scan parameters
+        id: scanparams
+        run: |
+          if \
+            [ "${{ github.event_name }}" != "pull_request" ] || \
+            ([ "${{ github.event.pull_request.head.repo.full_name }}" == "${{ github.event.pull_request.base.repo.full_name }}" ] && [ "${{ github.event.sender.login }}" != "dependabot[bot]" ]) \
+          then
+            echo ::set-output name=format::template
+            echo ::set-output name=template::@/contrib/sarif.tpl
+            echo ::set-output name=output::trivy-results.sarif
+          else
+            echo ::set-output name=format::table
+            echo ::set-output name=template::
+            echo ::set-output name=output::
+          fi
+
+      - name: Security Scan
+        uses: aquasecurity/trivy-action@master
+        id: scan
+        with:
+          image-ref: postfix-relay:${{ github.sha }}
+          format: ${{ steps.scanparams.outputs.format }}
+          template: ${{ steps.scanparams.outputs.template }}
+          output: ${{ steps.scanparams.outputs.output }}
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: trivy-results.sarif
+        if: steps.scanparams.outputs.output != ''
