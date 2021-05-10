@@ -6,6 +6,9 @@
 : "${SMTP_SERVER:?"required but not set"}"
 : "${SMTP_PORT:=587}"
 : "${SMTP_NETWORKS:="10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16"}"
+: "${SMTP_PASSWORD_FILE:=}"
+: "${SMTP_USERNAME:=}"
+: "${SMTP_PASSWORD:=}"
 
 if [ -n "${SMTP_PASSWORD_FILE}" ] && [ -f "${SMTP_PASSWORD_FILE}" ]; then
     SMTP_PASSWORD=$(cat "${SMTP_PASSWORD_FILE}")
