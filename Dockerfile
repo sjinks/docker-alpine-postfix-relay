@@ -1,6 +1,7 @@
-FROM alpine:3.14.0
+FROM alpine:3.14
 
 RUN \
+    apk --no-cache upgrade && \
     apk add --no-cache postfix cyrus-sasl cyrus-sasl-login cyrus-sasl-crammd5 && \
     postconf -ev 'inet_interfaces = all' && \
     postconf -ev 'mydestination = localhost' && \
