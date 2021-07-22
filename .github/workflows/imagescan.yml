@@ -46,8 +46,8 @@ jobs:
         id: scanparams
         run: |
           if \
-            [ "${{ github.event_name }}" != "pull_request" ] || \
-            ([ "${{ github.event.pull_request.head.repo.full_name }}" == "${{ github.event.pull_request.base.repo.full_name }}" ] && [ "${{ github.event.sender.login }}" != "dependabot[bot]" ]) \
+            ([ "${{ github.event_name }}" != "pull_request" ] || [ "${{ github.event.pull_request.head.repo.full_name }}" == "${{ github.event.pull_request.base.repo.full_name }}" ]| && \
+            [ "${{ github.event.sender.login }}" != "dependabot[bot]" ] \
           then
             echo ::set-output name=format::template
             echo ::set-output name=template::@/contrib/sarif.tpl
