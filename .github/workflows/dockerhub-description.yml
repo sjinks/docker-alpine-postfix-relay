@@ -9,10 +9,11 @@ on:
       - .github/workflows/dockerhub-description.yml
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   update-description:
-    permissions:
-      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
