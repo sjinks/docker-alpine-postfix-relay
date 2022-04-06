@@ -1,8 +1,6 @@
 name: Build Docker image
 
 on:
-  schedule:
-    - cron: '35 10 * * 1'
   push:
     branches:
       - master
@@ -13,10 +11,11 @@ on:
       - master
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   build:
-    permissions:
-      contents: read
     name: Build Docker image
     runs-on: ubuntu-latest
     steps:
@@ -51,7 +50,6 @@ jobs:
           images: wildwildangel/postfix-relay
           tags: |
             type=edge,branch=master
-            type=schedule
             type=ref,event=branch
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
