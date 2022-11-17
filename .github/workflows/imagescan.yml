@@ -68,7 +68,7 @@ jobs:
           output: ${{ steps.scanparams.outputs.output }}
 
       - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@cc7986c02bac29104a72998e67239bb5ee2ee110 # tag=v2.1.28
+        uses: github/codeql-action/upload-sarif@678fc3afe258fb2e0cdc165ccf77b85719de7b3c # v2.1.33
         with:
           sarif_file: trivy-results.sarif
         if: steps.scanparams.outputs.output != ''
