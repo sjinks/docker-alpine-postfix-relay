@@ -59,7 +59,7 @@ jobs:
           fi
 
       - name: Security Scan
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@d2a0b60797ff03db6132bd4e2b293f9b37081297 # master
         id: scan
         with:
           image-ref: postfix-relay:${{ github.sha }}
